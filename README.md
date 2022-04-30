@@ -12,14 +12,14 @@ Could i use Go to make a "cookie cutter" starter template that's even easier to 
 
 What if the app now needs to scrape a webpage? What if it needs to SSH into another server and grab some files? What if it needs to traverse some directories while reading and writing some files? These are all utterly trivial to do in a Python script. How approachable are these tasks in Go, while still maintaining a decent developer experience & easy deployment strategy?
 
-##  Developer Setup Log
+##  Developer Setup
 
 I want to document everything i did to make this, so that i can refresh quickly when i come back to it in future.
 
 I installed:
 
 - Go, i'm using v1.18 (latest available today)
-- An IDE or Editor<sup id="b1">[1](#f1)</sup>
+- An IDE or Editor<sup id="b1">[1](#f1)</sup> VSCode with gopls in my case
 
 ###  Initial Setup
 
@@ -76,6 +76,32 @@ So I plan to implement the following and tag the git repo when i'm happy with ea
 1. Connect to a remote json API and parse the results
 1. Traverse the filesystem and edit some files
 1. (Safely) Run an external command with user provided input
+
+### Development Log
+
+Notes of my experiences as I implement each part of the plan above.
+
+#### Milestone 1: Testing & Command Line Args
+
+The built in flag package can be made to comply with GNU-ish conventions but it's not the default. Probably the Go defaults reflect Plan9 OS's conventions? For example, i'd want single hyphen with single letter flags and double hyphen with word flags, e.g. "-h" and "--help" but flag wants to steer you to "-help". Indeed with my program, all 3 have become valid since i can't stop handling of the "-help" case. Making flag usage testable was ok-ish to do.
+
+* Feeling: stoked, i've been wanting to test-drive Go for ages and it's fun
+* Time spent (estimate): 2 hours
+
+####  Milestone 2: Serve an HTTP Endpoint
+
+You could do this *much* faster if you're willing to go with really basic behaviours but i wanted formatted logging, clean termination, parse-don't-validate style modelling of constraints like "valid network port" in the type system and of course i wanted to keep everything testable, which mostly means i wanted to use the dependency injection pattern everywhere.
+
+Mirroring my experience yesterday with the flag package, i found log to be a little bit under-powered but it didn't stop me doing what i wanted and ultimately that's what counts. I'm absolutely conscious that i could have had an easier ride with config, flags and logging by installing dependencies like viper, cobra & golog but i want to stick with zero external deps.
+
+Finding https://gist.github.com/creack/4c00ee404f2d7bd5983382cc93af5147 was a *major* help. I had a bunch of "basic" behaviours i wanted for my server and i'd have implemented them but this person did it nicer than i know my first attempt in Go would have been! They even added tracing which was a bonus that wasn't on my must-have's list. One thing they were missing was logging of HTTP Status code - this meant i had to ditch their defered goroutine approach because i need strict ordering (http handler *then* log result) but i have a sneaky suspicion there's a performance change by doing this. I don't know if it's positive or negative so i'll need to load test it later when i do my acceptance testing at the end.
+
+I'm starting to form an opinion of my productivity in Go, bearing in mind i've never written Go before, i'm a lot more productive right now than in vanilla Java (NB: excluding use of Spring). I'm more productive sooner than i expected, i attribute that to Go reliably doing what i expect. i haven't had an "Wow! I didn't expect that?!" moment to shake my confidence yet.
+
+That said, i'm a little bit unsure about some loose ends such as the HTTP Content-type header i'm not setting anywhere yet, i suspect it's probably serving a default text/html type for me. I haven't told the ServeMux router what HTTP methods to accept.
+
+* Feeling: reflective, Python is more expressive but so far i prefer Go over Java8
+* Time spent (estimate): 4 hours
 
 ---
 
