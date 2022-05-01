@@ -249,11 +249,12 @@ func TestWebServerIntegration(t *testing.T) {
 		path           string
 		expectedError  error
 		expectedStatus int
+		expectedMime   string
 		expectedBody   string
 	}{
 		// TODO: There's no scenario to validate handling of SIGINT
-		{"/", nil, http.StatusOK, "<html><h1>Web Server</h1></html>\n"},
-		{"/non-existant", nil, http.StatusNotFound, "404 page not found\n"},
+		{"/", nil, http.StatusOK, "text/html; charset=utf-8", "<html><h1>Web Server</h1></html>\n"},
+		{"/non-existant", nil, http.StatusNotFound, "text/plain; charset=utf-8", "404 page not found\n"},
 	}
 
 	for _, tt := range tests {
@@ -267,6 +268,10 @@ func TestWebServerIntegration(t *testing.T) {
 
 			if res.StatusCode != tt.expectedStatus {
 				t.Errorf("status got %d, want %d", res.StatusCode, tt.expectedStatus)
+			}
+
+			if res.Header.Get("Content-type") != tt.expectedMime {
+				t.Errorf("mime got %s, want %s", res.Header.Get("Content-type"), tt.expectedMime)
 			}
 
 			bodyBytes, err := ioutil.ReadAll(res.Body)
