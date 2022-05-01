@@ -96,9 +96,15 @@ Mirroring my experience yesterday with the flag package, i found log to be a lit
 
 Finding https://gist.github.com/creack/4c00ee404f2d7bd5983382cc93af5147 was a *major* help. I had a bunch of "basic" behaviours i wanted for my server and i'd have implemented them but this person did it nicer than i know my first attempt in Go would have been! They even added tracing which was a bonus that wasn't on my must-have's list. One thing they were missing was logging of HTTP Status code - this meant i had to ditch their defered goroutine approach because i need strict ordering (http handler *then* log result) but i have a sneaky suspicion there's a performance change by doing this. I don't know if it's positive or negative so i'll need to load test it later when i do my acceptance testing at the end.
 
-I'm starting to form an opinion of my productivity in Go, bearing in mind i've never written Go before, i'm a lot more productive right now than in vanilla Java (NB: excluding use of Spring). I'm more productive sooner than i expected, i attribute that to Go reliably doing what i expect. i haven't had an "Wow! I didn't expect that?!" moment to shake my confidence yet.
+I'm starting to form an opinion of my productivity in Go, bearing in mind i've never written Go before, i'm more productive right now than in vanilla Java (NB: excluding use of Spring). I'm more productive sooner than i expected, i attribute that to Go reliably doing what i expect. i haven't had a "Wow! I didn't expect that?!" moment to shake my confidence yet. There are some oddities right enough: date/time formatting literals, although it works just fine; also the const keyword is less useful than i'd hope for.
 
-That said, i'm a little bit unsure about some loose ends such as the HTTP Content-type header i'm not setting anywhere yet, i suspect it's probably serving a default text/html type for me. I haven't told the ServeMux router what HTTP methods to accept.
+I'm a little bit unsure about some loose ends such as the HTTP Content-type header i'm not setting anywhere yet, i suspect it's probably serving a default text/html type for me. I haven't told the ServeMux router what HTTP methods to accept. I have no idea how to apply backpressure to incoming requests. I'm a little bit worried about unneccessary heap pressure in the hot-path of serving requests, for example, LoggingResponseWriter is created for every request - now it's ultimately just an int and a reference to an existing writer, but in the hot-path, you don't want to be throwing fresh junk for the garbage collector each time. That said, i'm serving requests in around 17 micro seconds on an M1 Macbook Air, that'd be 50k-ish req/sec roughly.
+
+I love the [Learn Go With Tests](https://quii.gitbook.io/learn-go-with-tests/meta/why) site, as i've gone through more of it, i've just found more that i like.
+
+I think my initial goal of a single .go source file is misguided. That idea was based on my thoughts & desires for simplicity before i had experienced writing Go. Now with some experience, a single .go source file is not the right way to go about that.
+
+I like the built in testing facilities, there's nice touches like you can provide "example" tests and they're included in generated docs.
 
 * Feeling: reflective, Python is more expressive but so far i prefer Go over Java8
 * Time spent (estimate): 4 hours
