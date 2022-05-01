@@ -333,7 +333,7 @@ func runServerMainLoop(config *Config, ctx context.Context, httpServer *http.Ser
 	serviceLogger.Println(config.progname, "is starting as user", config.username, "on", config.listenPort)
 
 	if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
-		serviceLogger.Printf("Could not listen on %q: %s\n", config.listenPort, err)
+		serviceLogger.Printf("Could not listen on %d: %v\n", config.listenPort, err)
 		os.Exit(5)
 	}
 	<-ctx.Done()
