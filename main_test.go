@@ -101,6 +101,29 @@ func TestIndexHandler(t *testing.T) {
 	}
 }
 
+func TestStaticHandler(t *testing.T) {
+	response := httptest.NewRecorder()
+	request, _ := http.NewRequest(http.MethodGet, "/static/htmx.min.js", nil)
+
+	hdlr := makeStaticHandler()
+
+	hdlr.ServeHTTP(response, request)
+
+	if response.Result().StatusCode != http.StatusOK {
+		t.Errorf("status got %d, want %d", response.Result().StatusCode, http.StatusOK)
+	}
+
+	got := response.Body.String()
+	wantStart := "(function("
+	wantEnd := "rn U}()});"
+	if !strings.HasPrefix(got, wantStart) {
+		t.Errorf("start got %q, want %q", got[:10], wantStart)
+	}
+	if !strings.HasSuffix(got, wantEnd) {
+		t.Errorf("start got %q, want %q", got[len(got)-10:], wantEnd)
+	}
+}
+
 func TestHealthHandler(t *testing.T) {
 	var tests = []struct {
 		health           int64

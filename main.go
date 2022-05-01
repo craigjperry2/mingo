@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -34,6 +36,9 @@ type Config struct {
 	clock              clock
 }
 
+//go:embed static
+var static embed.FS
+
 // Bootstrap the environment, assemble the server, then hand over to the http main loop
 func main() {
 	config := &Config{
@@ -51,7 +56,7 @@ func main() {
 
 	setupLogging(config.loggingDestination, config.hostname)
 
-	ctx, server, _ := makeHttpServer(config)
+	ctx, server := makeHttpServer(config)
 	runServerMainLoop(config, ctx, server)
 }
 
@@ -197,10 +202,12 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 
 // Configure an HTTP server with routes, handlers, middleware & graceful shutdown ability
 // with thanks to https://gist.github.com/creack/4c00ee404f2d7bd5983382cc93af5147
-func makeHttpServer(config *Config) (context.Context, *http.Server, *http.ServeMux) {
+func makeHttpServer(config *Config) (context.Context, *http.Server) {
+
 	router := http.NewServeMux()
 	router.HandleFunc("/", index)
 	router.HandleFunc("/health", makeHealthHandler(&config.health, config.clock))
+	router.Handle("/static/", makeStaticHandler())
 
 	server := &http.Server{
 		Addr: "0.0.0.0:" + strconv.Itoa(int(config.listenPort)), // TODO: IPv6 controls
@@ -218,7 +225,7 @@ func makeHttpServer(config *Config) (context.Context, *http.Server, *http.ServeM
 
 	atomic.StoreInt64(&config.health, config.startUtc.UnixNano())
 
-	return ctx, server, router
+	return ctx, server
 }
 
 // When Ctrl+C, cause the server to stop accepting new requests, finish any existing requests then terminate
@@ -259,6 +266,15 @@ func index(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, "<html><h1>Web Server</h1></html>\n")
+}
+
+// Handle requests for files (.js, .css) from static dir
+func makeStaticHandler() http.Handler {
+	fSys, err := fs.Sub(static, ".")
+	if err != nil {
+		panic(err)
+	}
+	return http.FileServer(http.FS(fSys))
 }
 
 // Expose read-only server health status
@@ -307,11 +323,11 @@ func makeLoggingMiddleware(clock clock, loggingDestination io.Writer, hostname s
 type idFountain func() string
 
 func makeIdFountain(clock clock) idFountain {
-	return func () string {
+	return func() string {
 		return strconv.FormatInt(clock().UTC().UnixNano(), 36)
 	}
 }
-	
+
 func makeTracingMiddleware(nextRequestID idFountain) middleware {
 	return func(hdlr http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {

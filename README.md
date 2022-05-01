@@ -111,6 +111,18 @@ Another thing i like about Go is the community has definitely got the memo on un
 * Feeling: reflective, Python is more expressive but so far i prefer Go over Java8
 * Time spent (estimate): 8 hours
 
+
+####  Milestone 3: Serve a File Endpoint
+
+Ok now THAT was cool. Go embed is *awesome*. I can see so many use cases for simplifying distribution. My entire binary is now just over 6mb (only 40k of that is an embedded .js file). I *wish* my usual docker containers were only 6mb, this really is the neatest feature of Go so far. It was so ridiculously easy too.
+
+I'm not sure about my use of Go's testing facilities. I feel like my tests are quite long winded.
+
+I took a detour today and in a separate toy project i implemented a test that `os.Exec()`'s a "go run ." in another process and i got that working so if i change my mind about the current setup in this project (I call `main()` in a go routine) then i can switch over.
+
+* Feeling: vindicated investing time test-driving Go, go:embed is what i hoped would be possible in Go
+* Time spent (estimate): 15 minutes
+
 ---
 
 <b id="f1">1</b> I've chosen VSCode with the "gopls" language server. Here's a little cheat-sheet for the essential shortcuts to get stuff done: [↩](#b1)
