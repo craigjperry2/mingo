@@ -226,6 +226,7 @@ func setupIntegrationTestSuite(t *testing.T) func(t *testing.T) {
 	fmt.Println("Spawning main() with cli:", os.Args)
 	// TODO: Ideally spawn a new isolated process, not just a go routine for main() - but calling "go run ." via os Exec in a test actually runs something else not this project
 	go main()
+	time.Sleep(50 * time.Millisecond)
 	pollHealthUntilReady(testServerPort)
 
 	return func(t *testing.T) {
