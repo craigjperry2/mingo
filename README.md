@@ -106,8 +106,10 @@ I think my initial goal of a single .go source file is misguided. That idea was 
 
 I like the built in testing facilities, there's nice touches like you can provide "example" tests and they're included in generated docs.
 
+Another thing i like about Go is the community has definitely got the memo on unit testing, this is a breath of fresh air when i'm coming from working with Java where developers usually lean heavily towards integration testing. There's a place for both of course but many Java developers would disagree with unit testing being less painful because the common Java unit testing idiom is to treat "unit test" as meaning test a class at a time which is of course painful.
+
 * Feeling: reflective, Python is more expressive but so far i prefer Go over Java8
-* Time spent (estimate): 4 hours
+* Time spent (estimate): 8 hours
 
 ---
 

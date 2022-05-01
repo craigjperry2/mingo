@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -214,20 +215,70 @@ func TestTracingMiddleware(t *testing.T) {
 
 // --- Integration Tests ------------------------------------------------------
 
+// with thanks to https://medium.com/nerd-for-tech/setup-and-teardown-unit-test-in-go-bd6fa1b785cd
+func setupIntegrationTestSuite(t *testing.T) func(t *testing.T) {
+	// TODO: We don't have any logic for port clashes (common in CI environments), should retry on incrementing ports until it finds a free one but for now we just delegate that externally to the CI pipeline and it can pass us a known good free port (which is a solution with a race condition...)
+	testServerPort := os.Getenv("TEST_SERVER_PORT")
+
+	oldArgs := os.Args
+	os.Args = []string{"mingo", "--port", testServerPort}
+
+	fmt.Println("Spawning main() with cli:", os.Args)
+	// TODO: Ideally spawn a new isolated process, not just a go routine for main() - but calling "go run ." via os Exec in a test actually runs something else not this project
+	go main()
+	pollHealthUntilReady(testServerPort)
+
+	return func(t *testing.T) {
+		fmt.Println("ITS: Cleaning up after test, shutting down port", testServerPort)
+		os.Args = oldArgs
+		// TODO: We don't cleanup & shutdown the server or reap the goroutine - the port is taken until testing process exits
+	}
+}
+
 func TestWebServerIntegration(t *testing.T) {
 	// with thanks to https://peter.bourgon.org/blog/2021/04/02/dont-use-build-tags-for-integration-tests.html
 	testServerPort := os.Getenv("TEST_SERVER_PORT")
 	if testServerPort == "" {
 		t.Skip("set TEST_SERVER_PORT to run this test")
 	}
-	// TODO: Integration test for the service stack that asserts about:
-	//		* Service dependency wiring is all correct
-	//		* Before all tests - start server, wait for /healthz to return ok
-	//		* Configurable listen port (test this by assigning a random free port to make concurrent testing possible)
-	//		* /health endpoint behaviour including http status code and mime type
-	// 		* Status logging interceptor behaviour
-	//		* Clean shutdown behaviour in response to SIGINT
-	//		* Clean teardown regardless of failure
+
+	teardownSuite := setupIntegrationTestSuite(t)
+	defer teardownSuite(t)
+
+	var tests = []struct {
+		path           string
+		expectedError  error
+		expectedStatus int
+		expectedBody   string
+	}{
+		// TODO: There's no scenario to validate handling of SIGINT
+		{"/", nil, http.StatusOK, "<html><h1>Web Server</h1></html>\n"},
+		{"/non-existant", nil, http.StatusNotFound, "404 page not found\n"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+
+			res, err := http.Get("http://127.0.0.1:" + testServerPort + tt.path)
+
+			if err != nil {
+				t.Errorf("err got %v, want %v", err, tt.expectedError)
+			}
+
+			if res.StatusCode != tt.expectedStatus {
+				t.Errorf("status got %d, want %d", res.StatusCode, tt.expectedStatus)
+			}
+
+			bodyBytes, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				t.Errorf("Unexpected error when reading body %v", err)
+			}
+			body := string(bodyBytes)
+			if body != tt.expectedBody {
+				t.Errorf("body got %s, want %s", body, tt.expectedBody)
+			}
+		})
+	}
 }
 
 // --- Testing Helpers --------------------------------------------------------
@@ -258,4 +309,19 @@ func dummyHandler(w http.ResponseWriter, req *http.Request) {
 
 func hFunc() http.Handler {
 	return http.HandlerFunc(dummyHandler)
+}
+
+// poll /health for up to 500ms waiting for http 200
+func pollHealthUntilReady(testServerPort string) {
+	for i := 50; i > 0; i -= 1 {
+		fmt.Println("Testing for server readiness on port", testServerPort)
+		res, err := http.Get("http://127.0.0.1:" + testServerPort + "/health")
+		if err == nil { // NB: we're expecting an err to begin with
+			if res.StatusCode == http.StatusOK {
+				return
+			}
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	panic("HTTP Server Never Came Up")
 }

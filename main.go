@@ -160,6 +160,7 @@ type componentLogger struct {
 	component string
 }
 
+// TODO: suspect this is not idiomatic Go. This New* func is returning a *log.Logger not a *componentLogger
 func NewComponentLogger(clock clock, loggingDestination io.Writer, hostname string, component string) *log.Logger {
 	logger := log.New(componentLogger{clock, loggingDestination, hostname, component}, "", 0)
 	return logger
