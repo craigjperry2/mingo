@@ -17,8 +17,10 @@ import (
 // --- Unit Tests -------------------------------------------------------------
 
 func TestFlags(t *testing.T) {
-	const expectedHelpText = "Usage: testprog [OPTION]\n\nOptions:\n  -h, --help\tThis help message\n  -p, --port\tport to listen on for webserver\n"
+	const expectedHelpText = "Usage: testprog [OPTION]\n\nOptions:\n  -d, --dir <dir>\toverride files embedded in binary and serve /static/*\n  \t\t\turls from disk\n  -h, --help\t\tthis help message\n  -p, --port <port>\tport to listen on for webserver\n"
 	const expectedFlagError = "flag: help requested"
+	const missingPortArg = "flag needs an argument: -port"
+	const missingDirArg = "flag needs an argument: -d"
 	const portErrorTemplate = "invalid value \"%d\" for flag -port: port %d out of range [1:65535]"
 	var unexpectedPort0Error = fmt.Sprintf(portErrorTemplate, 0, 0)
 	var unexpectedPort65536Error = fmt.Sprintf(portErrorTemplate, 65536, 65536)
@@ -29,15 +31,18 @@ func TestFlags(t *testing.T) {
 		expectedLogging string
 		expectedErrStr  string
 	}{
-		{makeConfig([]string{}, 0, &loggingBuf), "", ""},
-		{makeConfig([]string{"-h"}, 0, &loggingBuf), expectedHelpText, expectedFlagError},
-		{makeConfig([]string{"--help"}, 0, &loggingBuf), expectedHelpText, expectedFlagError},
-		{makeConfig([]string{"-p", "1234"}, 1234, &loggingBuf), "", ""},
-		{makeConfig([]string{"--port", "1234"}, 1234, &loggingBuf), "", ""},
-		{makeConfig([]string{"--port", "0"}, 0, &loggingBuf), unexpectedPort0Error + "\n" + expectedHelpText, unexpectedPort0Error},
-		{makeConfig([]string{"--port", "1"}, 1, &loggingBuf), "", ""},
-		{makeConfig([]string{"--port", "65535"}, 65535, &loggingBuf), "", ""},
-		{makeConfig([]string{"--port", "65536"}, 0, &loggingBuf), unexpectedPort65536Error + "\n" + expectedHelpText, unexpectedPort65536Error},
+		{makeConfig([]string{}, 0, &loggingBuf, ""), "", ""},
+		{makeConfig([]string{"-h"}, 0, &loggingBuf, ""), expectedHelpText, expectedFlagError},
+		{makeConfig([]string{"--help"}, 0, &loggingBuf, ""), expectedHelpText, expectedFlagError},
+		{makeConfig([]string{"-p", "1234"}, 1234, &loggingBuf, ""), "", ""},
+		{makeConfig([]string{"--port", "1234"}, 1234, &loggingBuf, ""), "", ""},
+		{makeConfig([]string{"--port", "0"}, 0, &loggingBuf, ""), unexpectedPort0Error + "\n" + expectedHelpText, unexpectedPort0Error},
+		{makeConfig([]string{"--port", "1"}, 1, &loggingBuf, ""), "", ""},
+		{makeConfig([]string{"--port", "65535"}, 65535, &loggingBuf, ""), "", ""},
+		{makeConfig([]string{"--port", "65536"}, 0, &loggingBuf, ""), unexpectedPort65536Error + "\n" + expectedHelpText, unexpectedPort65536Error},
+		{makeConfig([]string{"--port"}, 0, &loggingBuf, ""), missingPortArg + "\n" + expectedHelpText, missingPortArg},
+		{makeConfig([]string{"-d"}, 0, &loggingBuf, ""), missingDirArg + "\n" + expectedHelpText, missingDirArg},
+		{makeConfig([]string{"--dir", "does-not-exist"}, 0, &loggingBuf, "does-not-exist"), "", ""},
 	}
 
 	for _, tt := range tests {
@@ -105,7 +110,7 @@ func TestStaticHandler(t *testing.T) {
 	response := httptest.NewRecorder()
 	request, _ := http.NewRequest(http.MethodGet, "/static/htmx.min.js", nil)
 
-	hdlr := makeStaticHandler()
+	hdlr := makeStaticHandler("")
 
 	hdlr.ServeHTTP(response, request)
 
@@ -122,6 +127,16 @@ func TestStaticHandler(t *testing.T) {
 	if !strings.HasSuffix(got, wantEnd) {
 		t.Errorf("start got %q, want %q", got[len(got)-10:], wantEnd)
 	}
+}
+
+func TestMakeStaticHandlerPanicsOnMissingDir(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("failed to panic on missing dir")
+		}
+	}()
+
+	makeStaticHandler("does-not-exist")
 }
 
 func TestHealthHandler(t *testing.T) {
@@ -312,8 +327,8 @@ func TestWebServerIntegration(t *testing.T) {
 
 // --- Testing Helpers --------------------------------------------------------
 
-func makeConfig(cli []string, port uint16, logDest *bytes.Buffer) Config {
-	return Config{time.Time{}, "testprog", cli, "", "", port, logDest, 0, nil}
+func makeConfig(cli []string, port uint16, logDest *bytes.Buffer, staticDir string) Config {
+	return Config{time.Time{}, "testprog", cli, "", "", port, logDest, 0, nil, staticDir}
 }
 
 func clockForTesting(timespec string) clock {

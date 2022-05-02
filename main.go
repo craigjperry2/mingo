@@ -34,10 +34,13 @@ type Config struct {
 	loggingDestination io.Writer
 	health             int64
 	clock              clock
+	staticDir          string
 }
 
 //go:embed static
 var static embed.FS
+
+const staticMount = "/static/"
 
 // Bootstrap the environment, assemble the server, then hand over to the http main loop
 func main() {
@@ -51,6 +54,7 @@ func main() {
 		loggingDestination: os.Stderr,
 		health:             0,
 		clock:              time.Now,
+		staticDir:          "",
 	}
 	mustHandleCliOverrides(config)
 
@@ -103,8 +107,11 @@ func parseFlags(config *Config) error {
 
 	flags.Usage = func() { usageHelpMessage(config.progname, flags.Output()) }
 
-	port := NewPortVar(&config.listenPort)
 	// Duplicated flags to achieve GNU-like command line syntax
+	flags.StringVar(&config.staticDir, "d", "", "override files embedded in binary and serve /static/* urls from disk")
+	flags.StringVar(&config.staticDir, "dir", "", "override files embedded in binary and serve /static/* urls from disk")
+
+	port := NewPortVar(&config.listenPort)
 	flags.Var(port, "port", "port to listen on for webserver")
 	flags.Var(port, "p", "port to listen on for webserver")
 
@@ -113,11 +120,14 @@ func parseFlags(config *Config) error {
 
 // Default usage neglects help flag and uses -flag rather than --flag or -f
 func usageHelpMessage(progname string, w io.Writer) {
+	// TODO: append options based on defined flags in order
 	template := `Usage: %s [OPTION]
 
 Options:
-  -h, --help	This help message
-  -p, --port	port to listen on for webserver
+  -d, --dir <dir>	override files embedded in binary and serve /static/*
+  			urls from disk
+  -h, --help		this help message
+  -p, --port <port>	port to listen on for webserver
 `
 	fmt.Fprintf(w, template, progname)
 }
@@ -207,7 +217,7 @@ func makeHttpServer(config *Config) (context.Context, *http.Server) {
 	router := http.NewServeMux()
 	router.HandleFunc("/", index)
 	router.HandleFunc("/health", makeHealthHandler(&config.health, config.clock))
-	router.Handle("/static/", makeStaticHandler())
+	router.Handle(staticMount, makeStaticHandler(config.staticDir))
 
 	server := &http.Server{
 		Addr: "0.0.0.0:" + strconv.Itoa(int(config.listenPort)), // TODO: IPv6 controls
@@ -269,12 +279,19 @@ func index(w http.ResponseWriter, req *http.Request) {
 }
 
 // Handle requests for files (.js, .css) from static dir
-func makeStaticHandler() http.Handler {
-	fSys, err := fs.Sub(static, ".")
-	if err != nil {
-		panic(err)
+func makeStaticHandler(staticDir string) http.Handler {
+	if staticDir == "" {
+		fSys, err := fs.Sub(static, ".")
+		if err != nil {
+			panic(err)
+		}
+		return http.FileServer(http.FS(fSys))
+	} else {
+		if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+			panic("dir doesn't exist: " + staticDir)
+		}
+		return http.StripPrefix(staticMount, http.FileServer(http.Dir(staticDir)))
 	}
-	return http.FileServer(http.FS(fSys))
 }
 
 // Expose read-only server health status
