@@ -125,6 +125,10 @@ I took a couple of detours today. For the first, I made a separate toy project t
 
 #####  HTMX Bulma, FontAwesome & Animate.css Detour
 
+![Screenshot v3 Homepage](docs/v3-home.jpeg)
+
+![Screenshot v3 Modal](docs/v3-modal.jpeg)
+
 I just finished another detour, this time into [HTMX](https://htmx.org/). I *really* want to like HTMX but i can see sharp edges. 
 
 I'll start with the bad bits. I think HTMX could be fine for small, short-lived toys (i.e. this project's use case) but it has a slower learning curve than jQuery. The lack of help for the developer to avoid accidentally leaving behind pollution of the DOM with old elements or event listeners is annoying. I spent time manually watching the inspector in Firefox while testing each possible interaction to make sure i was clean. There's no intellisense/auto complete/linting in my editor. The testing strategy is not clear to me either, other than going full-fat e2e tests which are easy to make slow and brittle. I really want some ergonomic unit testing support to let me work quickly with components, isolated from the distraction of the rest of my web server stack. I haven't intuited how deep linking could work yet, like if i want to link to page 2 of a paginated table, how would i do that with HTMX?
