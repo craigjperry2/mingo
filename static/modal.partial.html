@@ -1,0 +1,60 @@
+<div class="modal is-active animate__animated animate__fadeIn animate__faster">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">HTMX Modal</p>
+      <button class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="content">
+        <p>
+          This modal content was actually retrieved from the server when you
+          clicked the button. This page is using:
+        </p>
+        <ul>
+          <li>Bulma for styling the modal</li>
+          <li>Animate.css for the fade in/out animations on the modal</li>
+          <li>HTMX for loading from server</li>
+        </ul>
+        <p>
+          With HTMX the XHR call to the server retrieves a chunk of html rather
+          than json, then swaps that into the DOM. So there's no client side
+          templating needed.
+        </p>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-link">Cool Story Bro</button>
+    </footer>
+  </div>
+
+  <!-- If this <script> is in inside the modal <div>, then it'll also be removed from the DOM when we close the modal -->
+  <script>
+    function closeModal() {
+      const modal = htmx.find(".modal");
+      htmx.remove(modal, 500);
+      htmx.addClass(modal, "animate__fadeOut");
+      htmx.off("keydown", escapeHandler);
+    }
+
+    function escapeHandler(event) {
+      const e = event || window.event;
+      // Escape key
+      if (e.keyCode === 27) {
+        closeModal();
+      }
+    }
+
+    [
+      ".modal-background",
+      ".modal-card-head .delete",
+      ".modal-card-foot .button",
+    ].forEach(function (cls) {
+      const el = htmx.find(cls);
+      const modal = htmx.closest(el, ".modal");
+      htmx.on(el, "click", closeModal);
+    });
+
+    htmx.on("keydown", escapeHandler);
+  </script>
+</div>
