@@ -114,14 +114,37 @@ Another thing i like about Go is the community has definitely got the memo on un
 
 ####  Milestone 3: Serve a File Endpoint
 
-Ok now THAT was cool. Go embed is *awesome*. I can see so many use cases for simplifying distribution. My entire binary is now just over 6mb (only 40k of that is an embedded .js file). I *wish* my usual docker containers were only 6mb, this really is the neatest feature of Go so far. It was so ridiculously easy too.
+Ok now THAT was cool. Go embed is *awesome*. I can see so many use cases for simplifying distribution. My entire binary is now just over 6mb with the embedded html/css/js artifacts. I *wish* my usual docker containers were only 6mb, this really is the neatest feature of Go so far. It was so ridiculously easy too.
 
-I'm not sure about my use of Go's testing facilities. I feel like my tests are quite long winded.
+I'm not sure about my use of Go's testing facilities. I feel like my tests are quite long winded. I've joined the Go discord, i'm going to ask in there for a code review from someone versed in idiomatic Go.
 
-I took a detour today and in a separate toy project i implemented a test that `os.Exec()`'s a "go run ." in another process and i got that working so if i change my mind about the current setup in this project (I call `main()` in a go routine) then i can switch over.
+#####  Integration Testing a fork'd & exec'd Binary Detour
+
+I took a couple of detours today. For the first, I made a separate toy project to explore a test that `os.Exec()`'s a "go run ." in another process. I kept running into issues when i tried this yesterday, specifically the "go run ." i was invoking from the tests was different or at least was not exposing my flags as it did when i run from the CLI. Either way, i got it working without any dramas this time so if i change my mind about the current setup in this project (I call `main()` in a go routine) then i can switch over.
+
+
+#####  HTMX Bulma, FontAwesome & Animate.css Detour
+
+I just finished another detour, this time into [HTMX](https://htmx.org/). I *really* want to like HTMX but i can see sharp edges. 
+
+I'll start with the bad bits. I think HTMX could be fine for small, short-lived toys (i.e. this project's use case) but it has a slower learning curve than jQuery. The lack of help for the developer to avoid accidentally leaving behind pollution of the DOM with old elements or event listeners is annoying. I spent time manually watching the inspector in Firefox while testing each possible interaction to make sure i was clean. There's no intellisense/auto complete/linting in my editor. The testing strategy is not clear to me either, other than going full-fat e2e tests which are easy to make slow and brittle. I really want some ergonomic unit testing support to let me work quickly with components, isolated from the distraction of the rest of my web server stack. I haven't intuited how deep linking could work yet, like if i want to link to page 2 of a paginated table, how would i do that with HTMX?
+
+The good bits. It's a lot faster to add to a project like this (just source in the .js file) than building then bundling a create-react-app. The HTMX documentation site is fantastic, zero fluff, entire topics on single big pages so it's super fast to flip to that tab and ctrl+f for stuff in the browser. HTMX wants you to consider https://hyperscript.org/ and that does looks cute in the HTMX examples but it's almost 100kB and that goes against the ethos of this particular project. Also I'd be concerned about giving up the rich JS developer tooling of the browser (breakpoints, profiling etc.) just to get a cute syntax instead of my 10 lines of JS.
+
+In summary and with all this said, i think i will be likely to choose HTMX (maybe even with hyperscript) when i'm considering jQuery in future.
+
+[Bulma](https://bulma.io) is still awesome as ever. I only have good things to say about the product but HTMX's documentation layout, their "information architecture", is better (albeit less flashy). Bulma's is spread across pages and you have to think like them to find stuff in it. E.g. where is typography going to be in the docs hierarchy? I'd much rather a single big page i can just ctrl+f in when i'm developing and not interested in (very aesthetically pleasing) distractions.
+
+FontAwesome feels frustrating as ever. I see there's *another* major version, FA6! And you guessed it, all the names have changed again.
+
+I'd never heard of [Animate.css](https://animate.style/) before today but that was a fantastic first experience. A big thumbs up for their interactive documentation site too that has a very cute way of letting you test each animation.
+
+##### Final Words for Today
+
+With the HTMX detour, it instantly made me realise the go:embed is only for distribution. During dev you need reloading from the filesystem without having to rebuild & restart your go binary when some HTML changed (even if go's build is so fast that you'd still be faster than a java dev doing the same thing...). Mercifully adding this is ultimately a 1 line change.
 
 * Feeling: vindicated investing time test-driving Go, go:embed is what i hoped would be possible in Go
-* Time spent (estimate): 15 minutes
+* Time spent (estimate): 3 hours
 
 ---
 
