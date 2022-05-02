@@ -108,7 +108,7 @@ func TestIndexHandler(t *testing.T) {
 
 func TestStaticHandler(t *testing.T) {
 	response := httptest.NewRecorder()
-	request, _ := http.NewRequest(http.MethodGet, "/static/htmx.min.js", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/static/htmx/htmx.min.js", nil)
 
 	hdlr := makeStaticHandler("")
 
