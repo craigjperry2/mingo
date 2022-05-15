@@ -19,7 +19,7 @@ type Config struct {
 	loggingDestination io.Writer
 	staticDir          string
 	clock              system.Clock
-	db                 *database.DbNothingBurger
+	db                 *database.Db
 }
 
 var instance *Config
@@ -55,7 +55,7 @@ func Build(args []string, stderr io.Writer) (err error) {
 
 	cfg.loggingDestination = stderr
 
-	cfg.db = database.NewDatabase()
+	cfg.db = database.NewRealDatabase()
 
 	instance, err = parseFlags(cfg)
 
@@ -102,6 +102,6 @@ func (c *Config) GetUsername() string {
 	return c.username
 }
 
-func (c *Config) GetDatabase() *database.DbNothingBurger {
+func (c *Config) GetDatabase() *database.Db {
 	return c.db
 }

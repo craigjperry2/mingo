@@ -2,6 +2,13 @@ load("@bazel_gazelle//:deps.bzl", "go_repository")
 
 def go_dependencies():
     go_repository(
+        name = "com_github_mattn_go_sqlite3",
+        importpath = "github.com/mattn/go-sqlite3",
+        sum = "h1:1tj15ngiFfcZzii7yd82foL+ks+ouQcj8j/TPq3fk1I=",
+        version = "v1.14.13",
+    )
+
+    go_repository(
         name = "org_golang_x_exp",
         importpath = "golang.org/x/exp",
         sum = "h1:TfdoLivD44QwvssI9Sv1xwa5DcL5XQr4au4sZ2F2NV4=",

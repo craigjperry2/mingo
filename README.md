@@ -398,6 +398,10 @@ I encountered a bazel issue switching from GoLand back to VSCode and had to tell
 
 I haven't wrestled with making a binary artifact available in the context of an integration or end-to-end test yet.
 
+####  Milestone 5: Persist Data in a SQLite DB
+
+Not much to say about this milestone, it was about 10 lines of code.
+
 ---
 
 <b id="f1">1</b> I've chosen VSCode with the "gopls" language server. Here's a little cheat-sheet for the essential

@@ -11,7 +11,7 @@ import (
 
 // Handle CRUD requests to the Person resource
 type CrudHandler struct {
-	db *database.DbNothingBurger
+	db *database.Db
 }
 
 func NewCrudHandler() CrudHandler {
@@ -50,9 +50,7 @@ func (h CrudHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			limit = 1
 		}
 		all, _ := h.db.GetAll(offset, limit)
-		fmt.Println("all", all)
 		for _, p := range all {
-			fmt.Println("Writing", p)
 			fmt.Fprintf(w, `<tr> <td>%d</td> <td>%s</td> <td>%s</td> <td><div class="buttons are-small"><button class="button is-info" hx-get="/edit?id=%d">Edit</button><button class="button is-danger" hx-delete="/crud?id=%d">Delete</button></div></td> </tr>`, p.Id, p.Name, p.Location, p.Id, p.Id)
 		}
 		if limit == len(all) {

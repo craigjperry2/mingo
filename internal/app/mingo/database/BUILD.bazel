@@ -5,8 +5,12 @@ go_library(
     srcs = [
         "doc.go",
         "fake.go",
+        "real.go",
     ],
     importpath = "github.com/craigjperry2/mingo/internal/app/mingo/database",
     visibility = ["//:__subpackages__"],
-    deps = ["//internal/app/mingo"],
+    deps = [
+        "//internal/app/mingo",
+        "@com_github_mattn_go_sqlite3//:go-sqlite3",
+    ],
 )
