@@ -86,6 +86,7 @@ So I plan to implement the following and tag the git repo when i'm happy with ea
 1. Serve an htmx-driven CRUD page
     * I'll explore live-reloading options
 1. Persist data in a sqlite DB
+1. Deploy in a docker container
 1. Setup schema migrations
 1. Connect to a remote json API and parse the results
 1. Traverse the filesystem and edit some files
@@ -401,6 +402,10 @@ I haven't wrestled with making a binary artifact available in the context of an 
 ####  Milestone 5: Persist Data in a SQLite DB
 
 Not much to say about this milestone, it was about 10 lines of code.
+
+####  Milestone 6: Deploy in a Docker Container
+
+I'm pausing this project for now, i've got about 75% of the value from it i want but i'm going on a detour to rewrite this in Rust...
 
 ---
 
