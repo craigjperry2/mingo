@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "database",
+    srcs = [
+        "doc.go",
+        "fake.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo/database",
+    visibility = ["//:__subpackages__"],
+    deps = ["//internal/app/mingo"],
+)

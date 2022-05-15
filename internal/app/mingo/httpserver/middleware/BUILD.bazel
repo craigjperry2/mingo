@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "middleware",
+    srcs = [
+        "doc.go",
+        "logging.go",
+        "middlewares.go",
+        "tracing.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo/httpserver/middleware",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/app/mingo/config",
+        "//internal/app/mingo/logger",
+    ],
+)

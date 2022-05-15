@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "stdlibext",
+    srcs = [
+        "doc.go",
+        "math.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/pkg/stdlibext",
+    visibility = ["//:__subpackages__"],
+    deps = ["@org_golang_x_exp//constraints"],
+)
+
+go_test(
+    name = "stdlibext_test",
+    srcs = ["math_test.go"],
+    embed = [":stdlibext"],
+)

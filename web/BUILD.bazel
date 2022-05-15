@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "web",
+    srcs = ["embed.go"],
+    embedsrcs = [
+        "static/animate.css/animate.min.css",
+        "static/bulma/bulma.min.css",
+        "static/fa/css/all.min.css",
+        "static/fa/webfonts/fa-brands-400.eot",
+        "static/fa/webfonts/fa-brands-400.svg",
+        "static/fa/webfonts/fa-brands-400.ttf",
+        "static/fa/webfonts/fa-brands-400.woff",
+        "static/fa/webfonts/fa-brands-400.woff2",
+        "static/fa/webfonts/fa-regular-400.eot",
+        "static/fa/webfonts/fa-regular-400.svg",
+        "static/fa/webfonts/fa-regular-400.ttf",
+        "static/fa/webfonts/fa-regular-400.woff",
+        "static/fa/webfonts/fa-regular-400.woff2",
+        "static/fa/webfonts/fa-solid-900.eot",
+        "static/fa/webfonts/fa-solid-900.svg",
+        "static/fa/webfonts/fa-solid-900.ttf",
+        "static/fa/webfonts/fa-solid-900.woff",
+        "static/fa/webfonts/fa-solid-900.woff2",
+        "static/htmx/htmx.min.js",
+        "static/crud.html",
+        "static/index.html",
+        "static/modal.partial.html",
+    ],
+    importpath = "github.com/craigjperry2/mingo/web",
+    visibility = ["//visibility:public"],
+)

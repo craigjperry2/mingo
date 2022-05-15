@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "config",
+    srcs = [
+        "cli.go",
+        "config.go",
+        "doc.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo/config",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/app/mingo/database",
+        "//internal/app/mingo/system",
+    ],
+)
+
+go_test(
+    name = "config_test",
+    srcs = [
+        "cli_test.go",
+        "config_test.go",
+    ],
+    embed = [":config"],
+    deps = ["//internal/app/mingo/system"],
+)

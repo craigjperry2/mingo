@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "orchestrator",
+    srcs = [
+        "doc.go",
+        "lifecycle.go",
+        "orchestrator.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo/orchestrator",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/app/mingo/config",
+        "//internal/app/mingo/errors",
+        "//internal/app/mingo/httpserver",
+        "//internal/app/mingo/logger",
+    ],
+)
+
+go_test(
+    name = "orchestrator_test",
+    srcs = [
+        "lifecycle_test.go",
+        "orchestrator_test.go",
+    ],
+    embed = [":orchestrator"],
+)

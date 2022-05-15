@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "handlers",
+    srcs = [
+        "crud.go",
+        "doc.go",
+        "edit.go",
+        "health.go",
+        "index.go",
+        "static.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo/httpserver/handlers",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/app/mingo/config",
+        "//internal/app/mingo/database",
+        "//web",
+    ],
+)

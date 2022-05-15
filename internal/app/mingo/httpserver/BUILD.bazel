@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "httpserver",
+    srcs = [
+        "doc.go",
+        "server.go",
+    ],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo/httpserver",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/app/mingo/config",
+        "//internal/app/mingo/httpserver/handlers",
+        "//internal/app/mingo/httpserver/middleware",
+        "//internal/app/mingo/logger",
+    ],
+)

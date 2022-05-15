@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>HTMX and Bulma on Go</title>
+    <link rel="stylesheet" href="/static/bulma/bulma.min.css" />
+    <link href="/static/fa/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/animate.css/animate.min.css" />
+    <script src="/static/htmx/htmx.min.js" defer></script>
+    <meta name="htmx-config" content='{"useTemplateFragments":"true"}'>
+    <style>
+        tr.htmx-swapping td {
+            opacity: 0;
+            transition: opacity 1s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar">
+    <div class="container">
+        <div id="navMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="index.html" hx-boost="true"> Popup </a>
+                <a class="navbar-item is-active" href="crud.html" hx-boost="true">
+                    CRUD
+                </a>
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a
+                                class="button is-dark"
+                                href="https://github.com/craigjperry2/mingo"
+                        >
+                  <span class="icon-text">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>GitHub</span>
+                  </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<section class="hero is-link">
+    <div class="hero-body">
+        <p class="title">HTMX and Bulma on Go</p>
+    </div>
+</section>
+
+<section class="section">
+    <h1 class="title">CRUD</h1>
+    <h2 class="subtitle">
+        Load a table, 2 rows at a time with Create, Read, Update & Delete
+    </h2>
+    <div class="block">
+        <table class="table">
+            <thead>
+            <tr>
+                <th><abbr title="Identity">ID</abbr></th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody
+                    class="tablebody"
+                    hx-confirm="Are you sure?"
+                    hx-target="closest tr"
+                    hx-swap="outerHTML swap:1s"
+            >
+            <tr>
+                <td colspan="4" class="has-text-centered">
+                    <button
+                            class="button is-link"
+                            hx-get="/crud?limit=2"
+                            hx-swap="outerHTML"
+                            hx-confirm="unset"
+                    >
+                        Load More...
+                        <span class="htmx-indicator">
+                    <span class="icon-text">
+                      <span class="icon">
+                        <i class="fas fa-spinner"></i>
+                      </span>
+                    </span>
+                  </span>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td></td>
+                <td><input name="name" placeholder="name"></td>
+                <td><input name="location" placeholder="location"></td>
+                <td>
+                    <div class="buttons are-small">
+                        <button class="button is-info" hx-post="/edit" hx-include="closest tr" hx-target="closest tr"
+                                hx-swap="outerHTML">Add
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        htmx.logger = function (elt, event, data) {
+            if (console) {
+                console.log(event, elt, data);
+            }
+        }
+    });
+</script>
+</body>
+</html>

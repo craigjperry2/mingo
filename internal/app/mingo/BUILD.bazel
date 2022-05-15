@@ -1,0 +1,8 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mingo",
+    srcs = ["person.go"],
+    importpath = "github.com/craigjperry2/mingo/internal/app/mingo",
+    visibility = ["//:__subpackages__"],
+)
